@@ -114,3 +114,65 @@ const sum = function (a, b) {
 ### 转换类案例
 
 ## webpack treeshaking 插件
+
+## @babel/core
+
+## @babel/template
+
+`@babel/types` 可以用来创建节点，但是太复杂了。`@babel/template` 用于简化创建 ast 节点的创建过程。
+
+template 支持三种语法：
+
+- 语法占位符 `%%`, v7.4.0 引入，优点是不和代码中大写字符串冲突。
+- 标识符占位符，大写
+- es6 模版字符串
+
+注意前两种语法不能混合使用。
+
+示例代码：
+
+```js
+const template = require("@babel/template").default;
+const generate = require("@babel/generator").default;
+
+const buildRequire = template.smart(`
+  var %%importName%% = require(%%source%%);
+`);
+const ast = buildRequire({
+  importName: t.identifier("myModule"), // 变量
+  source: t.stringLiteral("my-module"), // 字符串
+});
+
+console.log(generate(ast).code);
+// var myModule = require("my-module");
+```
+
+**API**
+
+- template.ast 直接返回 ast
+- template.smart 和 template 函数一样
+- template.statement 返回单一语句节点
+- template.statements 返回语句节点数组
+- template.express 返回表达式节点
+- template.program 返回 Program 节点
+
+**使用**
+
+```
+template(code, [opts])
+```
+
+默认返回一个函数。如果使用 .ast 会直接返回 ast。
+
+**options**
+
+接受所有的 `@babel/parser` 选项，并有一些自己的选项。
+
+- allowReturnOutsideFunction: true 允许在函数外 return
+- allowSuperOutsideMethod: true 运行在方法外 super
+- sourceType: module
+- syntacticPlaceholders 是否开启 %% 占位符
+- `placeholderWhitelist: Set<string>` 占位符列表，和 syntacticPlaceholders true 不兼容
+- `placeholderPattern: /^[_$A-Z0-9]+$/` 占位符正则
+- `preserveComments: false` 是否保留注释
+
